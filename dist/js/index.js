@@ -135,12 +135,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // создаем классы для карточек
     class CardMenu {
-        constructor(src, alt, menuSub, menuDescr, menuTotal, parentSelector) {
+        constructor(src, alt, menuSub, menuDescr, menuTotal, parentSelector, ...classes) {
             this.src = src;
             this.alt = alt;
             this.menuSub = menuSub;
             this.menuDescr = menuDescr;
             this.menuTotal = menuTotal;
+            this.classes = classes;
             this.parent = document.querySelector(parentSelector);
             this.transfer = 27;
             this.change();
@@ -151,7 +152,12 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         render() {
             const element = document.createElement('div');
-            element.innerHTML = `<div class="menu__item">
+            this.element = ("menu__item");
+            if (this.classes.length === 0) {
+                element.classList.add(this.element);
+            }
+            this.classes.forEach(className => element.classList.add(className));
+            element.innerHTML = `<div>
  <img src=${this.src} alt="${this.alt}">
  <h3 class="menu__item-subtitle">${this.menuSub}</h3>
  <div class="menu__item-descr">${this.menuDescr}</div> 
@@ -159,7 +165,8 @@ window.addEventListener('DOMContentLoaded', () => {
 <div class = "menu__item-price" >
     <div class = "menu__item-cost" > Цена: </div> 
     <div class = "menu__item-total" > <span > ${this.menuTotal}</span> грн/день </div> </div> 
-</div>`;
+    </div>
+`;
             this.parent.append(element);
         }
 
