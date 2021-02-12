@@ -119,10 +119,10 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }
     });
-    //const timeId = setTimeout(openModel, 3000);
+    const timeId = setTimeout(openModel, 3000);
 
     function showByScroll() {
-        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight - 75) {
+        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
             openModel();
             window.removeEventListener('scroll', showByScroll);
         }
@@ -192,7 +192,7 @@ window.addEventListener('DOMContentLoaded', () => {
           не только красивый дизайн упаковки,
            но и качественное исполнение блюд. Красная рыба,
             морепродукты, фрукты - ресторанное меню без похода 
-             в ресторан!`,
+        в ресторан!`,
         15,
         '.menu .container').render();
 
@@ -203,10 +203,55 @@ window.addEventListener('DOMContentLoaded', () => {
         `Меню “Постное” - это тщательный подбор ингредиентов:
         полное отсутствие продуктов животного происхождения, 
         молоко из миндаля, овса, кокоса или гречки, правильное
-         количество белков за счет тофу и импортных вегетарианских стейков.`,
+        количество белков за счет тофу и импортных вегетарианских стейков.`,
         12,
         '.menu .container').render();
 
+
+    // работа с сервером
+    const forms = document.querySelectorAll('form');
+    const message = {
+        loading: 'Загрузка',
+        success: 'Спасибо! Мы с Вами свяжемся!',
+        failure: 'Ошибка',
+    };
+    forms.forEach(item => {
+        postData(item);
+    });
+
+    function postData(form) {
+        form.addEventListener('submit', (e) => {
+
+            e.preventDefault();
+
+            const statusMessage = document.createElement('div');
+            statusMessage.classList.add('status');
+            console.log(statusMessage);
+            statusMessage.textContent = message.loading;
+            form.append(statusMessage);
+
+            const request = new XMLHttpRequest();
+            request.open('POST', 'server.php');
+            // request.setRequestHeader('Content-type', 'multipart/form-data');
+
+            const formData = new FormData(form);
+            request.send(formData);
+            request.addEventListener('load', () => {
+                if (request.status === 200) {
+                    console.log(request.response);
+                    statusMessage.textContent = message.success;
+                    form.reset();
+                    setTimeout(() => {
+                        statusMessage.remove()
+                    }, 2000);
+                } else {
+                    statusMessage.textContent = message.failure;
+
+
+                }
+            });
+        });
+    }
 
 
 });
