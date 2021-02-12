@@ -90,8 +90,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // создаем модальное окно
     const modalTrigger = document.querySelectorAll('[data-modal]'),
-        modal = document.querySelector('.modal'),
-        modalClose = document.querySelector('[data-close]');
+        modal = document.querySelector('.modal');
+
 
     function openModel() {
         modal.classList.add('show');
@@ -110,12 +110,9 @@ window.addEventListener('DOMContentLoaded', () => {
         item.addEventListener('click', openModel);
     });
 
-    modalClose.addEventListener('click',
-        closeModal
-    );
 
     modal.addEventListener('click', (e) => {
-        if (e.target == modal) {
+        if (e.target == modal || e.target.getAttribute('data-close') == "") {
             closeModal();
         }
     });
@@ -211,7 +208,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // работа с сервером
     const forms = document.querySelectorAll('form');
     const message = {
-        loading: 'Загрузка',
+        loading: 'img/form/spiner.svg',
         success: 'Спасибо! Мы с Вами свяжемся!',
         failure: 'Ошибка',
     };
@@ -224,10 +221,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
             e.preventDefault();
 
-            const statusMessage = document.createElement('div');
-            statusMessage.classList.add('status');
-            console.log(statusMessage);
-            statusMessage.textContent = message.loading;
+            const statusMessage = document.createElement('img');
+            statusMessage.src = message.loading;
+            statusMessage.style.cssText = `
+            display:block;
+            margin: 0 auto;
+            `;
             form.append(statusMessage);
 
             const request = new XMLHttpRequest();
@@ -239,19 +238,43 @@ window.addEventListener('DOMContentLoaded', () => {
             request.addEventListener('load', () => {
                 if (request.status === 200) {
                     console.log(request.response);
-                    statusMessage.textContent = message.success;
+                    showThanksModal(message.success);
                     form.reset();
-                    setTimeout(() => {
-                        statusMessage.remove()
-                    }, 2000);
+
+                    statusMessage.remove();
+
                 } else {
-                    statusMessage.textContent = message.failure;
+                    showThanksModal(message.failure);
 
 
                 }
             });
         });
     }
+    // оповещение пользователя
+    function showThanksModal(message) {
+        const prevModalDialog = document.querySelector('.modal__dialog');
+        prevModalDialog.classList.add('hide');
+        openModel();
+
+        const thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog');
+        thanksModal.innerHTML = `
+        <div class="modal__content">
+        <div class="modal__close" data-close>x</div>
+        <div class="modal__title">${message}</div>
+        `;
+        document.querySelector('.modal').append(thanksModal);
+        setTimeout(() => {
+            thanksModal.remove();
+            prevModalDialog.classList.add('show');
+            prevModalDialog.classList.remove('hide');
+            closeModal();
+
+        }, 4000);
+    }
+
+
 
 
 });
