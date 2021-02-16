@@ -227,28 +227,45 @@ window.addEventListener('DOMContentLoaded', () => {
             display:block;
             margin: 0 auto;
             `;
-            form.append(statusMessage);
-
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
-            // request.setRequestHeader('Content-type', 'multipart/form-data');
+            form.insertAdjacentElement('afterend', statusMessage);
 
             const formData = new FormData(form);
-            request.send(formData);
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    console.log(request.response);
+
+            // const request = new XMLHttpRequest();
+            // request.open('POST', 'server.php');
+            fetch('server.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(data => data.text())
+                .then(data => {
+                    console.log(data);
                     showThanksModal(message.success);
-                    form.reset();
-
                     statusMessage.remove();
-
-                } else {
+                }).catch(() => {
                     showThanksModal(message.failure);
+                }).finally(() => {
+                    form.reset();
+                });
+
+            // request.setRequestHeader('Content-type', 'multipart/form-data');
 
 
-                }
-            });
+            // request.send(formData);
+            // request.addEventListener('load', () => {
+            //     if (request.status === 200) {
+            //         console.log(request.response);
+            //         showThanksModal(message.success);
+            //         form.reset();
+
+            //         statusMessage.remove();
+
+            //     } else {
+            //         showThanksModal(message.failure);
+
+
+            //     }
+            // });
         });
     }
     // оповещение пользователя
