@@ -231,8 +231,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
             const formData = new FormData(form);
 
-            // const request = new XMLHttpRequest();
-            // request.open('POST', 'server.php');
+
             fetch('server.php', {
                     method: 'POST',
                     body: formData
@@ -248,24 +247,6 @@ window.addEventListener('DOMContentLoaded', () => {
                     form.reset();
                 });
 
-            // request.setRequestHeader('Content-type', 'multipart/form-data');
-
-
-            // request.send(formData);
-            // request.addEventListener('load', () => {
-            //     if (request.status === 200) {
-            //         console.log(request.response);
-            //         showThanksModal(message.success);
-            //         form.reset();
-
-            //         statusMessage.remove();
-
-            //     } else {
-            //         showThanksModal(message.failure);
-
-
-            //     }
-            // });
         });
     }
     // оповещение пользователя
@@ -367,10 +348,10 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     next.addEventListener('click', () => {
-        if (offset == (+width.slice(0, width.length - 2) * (slides.length - 1))) {
+        if (offset == (+width.replace(/\D/g, '') * (slides.length - 1))) {
             offset = 0;
         } else {
-            offset += +width.slice(0, width.length - 2);
+            offset += +width.replace(/\D/g, '');
         }
 
         slidesFild.style.transform = `translateX(-${offset}px)`;
@@ -435,46 +416,111 @@ window.addEventListener('DOMContentLoaded', () => {
             dots[index - 1].style.opacity = 1;
         });
     });
+    // calc
+    const result = document.querySelector('.calculating__result span');
+    let sex, height, weight, age, ratio;
+    if (localStorage.getItem('sex')) {
+        sex = localStorage.getItem('sex');
+    } else {
+        sex = 'female';
+        localStorage.setItem('sex', 'female');
+    }
+
+    if (localStorage.getItem('ratio')) {
+        ratio = localStorage.getItem('ratio');
+    } else {
+        ratio = 1.375;
+        localStorage.setItem('ratio', 1.375);
+    }
+
+    function calcTotal() {
+        if (!sex || !height || !weight || !age || !ratio) {
+            result.textContent = '____'; // Можете придумать что угодно
+            return;
+        }
+        if (sex === 'female') {
+            result.textContent = Math.round((447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age)) * ratio);
+        } else {
+            result.textContent = Math.round((88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age)) * ratio);
+        }
+    }
+
+    calcTotal();
+
+    function initLocalSettings(selector, activeClass) {
+        const elements = document.querySelectorAll(selector);
+
+        elements.forEach(elem => {
+            elem.classList.remove(activeClass);
+            if (elem.getAttribute('id') === localStorage.getItem('sex')) {
+                elem.classList.add(activeClass);
+            }
+            if (elem.getAttribute('data-ratio') === localStorage.getItem('ratio')) {
+                elem.classList.add(activeClass);
+            }
+        });
+    }
+
+    initLocalSettings('#gender div', 'calculating__choose-item_active');
+    initLocalSettings('.calculating__choose_big div', 'calculating__choose-item_active');
+
+    function getStaticInformation(selector, activeClass) {
+        const elements = document.querySelectorAll(`${selector} div`);
+
+        elements.forEach(elem => {
+            elem.addEventListener('click', (e) => {
+                if (e.target.getAttribute('data-ratio')) {
+                    ratio = +e.target.getAttribute('data-ratio');
+                    localStorage.setItem('ratio', +e.target.getAttribute('data-ratio'));
+                } else {
+                    sex = e.target.getAttribute('id');
+                    localStorage.setItem('sex', e.target.getAttribute('id'));
+                }
+
+                elements.forEach(elem => {
+                    elem.classList.remove(activeClass);
+                });
+
+                e.target.classList.add(activeClass);
+
+                calcTotal();
+            });
+        });
+    }
+
+    getStaticInformation('#gender div', 'calculating__choose-item_active');
+    getStaticInformation('.calculating__choose_big div', 'calculating__choose-item_active');
+
+    function getDynamicInformation(selector) {
+        const input = document.querySelector(selector);
+
+        input.addEventListener('input', () => {
+
+            if (input.value.match(/\D/g)) {
+                input.style.border = "1px solid red";
+            } else {
+                input.style.border = 'none';
+            }
 
 
-    // showSlides(index);
+            switch (input.getAttribute('id')) {
+                case "height":
+                    height = +input.value;
+                    break;
+                case "weight":
+                    weight = +input.value;
+                    break;
+                case "age":
+                    age = +input.value;
+                    break;
+            }
 
-    // if (slides.length < 10) {
-    //     totel.textContent = (`0${slides.length}`);
-    // } else {
-    //     totel.textContent = (slides.length);
-    // }
+            calcTotal();
+        });
+    }
 
-    // function showSlides(n) {
-    //     if (n > slides.length) {
-    //         index = 1;
-    //     }
-    //     if (n < 1) {
-    //         index = slides.length;
-    //     }
-    //     slides.forEach(item => item.style.display = 'none');
-
-    //     slides[index - 1].style.display = 'block';
-    //     if (slides.length < 10) {
-    //         current.textContent = (`0${index}`);
-    //     } else {
-    //         current.textContent = (index);
-    //     }
-    // }
-
-    // function plusSlide(n) {
-    //     showSlides(index += n);
-    // }
-    // prev.addEventListener('click', () => {
-    //     plusSlide(-1);
-
-    // });
-    // next.addEventListener('click', () => {
-    //     plusSlide(1);
-    // });
-
-
-
-
+    getDynamicInformation('#height');
+    getDynamicInformation('#weight');
+    getDynamicInformation('#age');
 
 });
